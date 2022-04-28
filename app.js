@@ -5,14 +5,23 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
 var session = require('express-session');
-
+var MongoStore = require('connect-mongo');
 var app = express();
+
+// mongodb connectiion
+mongoose.connect('mongodb://127.0.0.1:27017/bookworm');
+var db = mongoose.connection;
+// if mongo conection error
+db.on('error', console.error.bind(console, 'connection error:'));
 
 // use sessions for tracking login
 app.use(session({
   secret: 'treehouse',
   resave: true,
-  saveUninitialized: false
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: 'mongodb://127.0.0.1:27017/bookworm'
+  })
 }));
 
 // make user id available on response
@@ -20,12 +29,6 @@ app.use(function (req, res, next) {
   res.locals.currentUser = req.session.userId;
   next();
 });
-
-// mongodb connectiion
-mongoose.connect('mongodb://127.0.0.1:27017/bookworm');
-var db = mongoose.connection;
-// if mongo conection error
-db.on('error', console.error.bind(console, 'connection error:'));
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
