@@ -3,6 +3,13 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var mongoose = require('mongoose');
+
+// mongodb connectiion
+mongoose.connect('mongodb://127.0.0.1:27017/bookworm');
+var db = mongoose.connection;
+// if mongo conection error
+db.on('error', console.error.bind(console, 'connection error:'));
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -23,6 +30,7 @@ app.use('/', indexRouter);
 app.use('/contact', indexRouter);
 app.use('/about', indexRouter);
 app.use('/register', indexRouter);
+
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
