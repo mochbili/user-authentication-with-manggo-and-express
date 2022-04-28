@@ -4,6 +4,16 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose = require('mongoose');
+var session = require('express-session');
+
+var app = express();
+
+// use sessions for tracking login
+app.use(session({
+  secret: 'treehouse',
+  resave: true,
+  saveUninitialized: false
+}));
 
 // mongodb connectiion
 mongoose.connect('mongodb://127.0.0.1:27017/bookworm');
@@ -13,8 +23,6 @@ db.on('error', console.error.bind(console, 'connection error:'));
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-
-var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -30,6 +38,7 @@ app.use('/', indexRouter);
 app.use('/contact', indexRouter);
 app.use('/about', indexRouter);
 app.use('/register', indexRouter);
+app.use('/login', indexRouter);
 
 app.use('/users', usersRouter);
 
