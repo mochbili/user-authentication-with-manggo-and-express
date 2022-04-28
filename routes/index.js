@@ -23,11 +23,40 @@ router.get('/profile', function(req, res, next) {
   User.findById(req.session.userId)
       .exec(function(error, user) {
         if (error) {
-          return next(error)
+          return next(error);
         } else {
           return res.render('profile', {title: 'Profile', name: user.name, favorite: user.favoriteBook});
         }
       });
+});
+
+router.get('/remove-account', function(req, res, next) {
+  if (!req.session.userId) {
+    var err = new Error('You are can not delete you profile');;
+    err.status = 403;
+    return next(err);
+  }
+  User.remove({'_id': req.session.userId})
+      .exec(function(error) {
+        if (error) {
+          return next(error);
+        } else {
+          req.session.destroy();
+          return res.redirect('/');
+        }
+      });
+});
+
+router.get('/logout', function(req, res, next) {
+  if (req.session) {
+    req.session.destroy(function (err) {
+      if (err) {
+        return next(err);
+      } else {
+        return res.redirect('/');
+      }
+    });
+  }
 });
 
 router.get('/login', function(req, res, next) {
