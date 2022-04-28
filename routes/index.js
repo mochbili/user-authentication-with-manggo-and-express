@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var User = require('../model/user');
+var mid = require('../middleware');
 
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
@@ -14,12 +15,7 @@ router.get('/about', function(req, res, next) {
   res.render('about', { title: 'About' });
 });
 
-router.get('/profile', function(req, res, next) {
-  if (!req.session.userId) {
-    var err = new Error('You are not authorized to view this page');;
-    err.status = 403;
-    return next(err);
-  }
+router.get('/profile', mid.requiredLogin, function(req, res, next) {
   User.findById(req.session.userId)
       .exec(function(error, user) {
         if (error) {
@@ -30,12 +26,7 @@ router.get('/profile', function(req, res, next) {
       });
 });
 
-router.get('/remove-account', function(req, res, next) {
-  if (!req.session.userId) {
-    var err = new Error('You are can not delete you profile');;
-    err.status = 403;
-    return next(err);
-  }
+router.get('/remove-account', mid.requiredProfile, function(req, res, next) {
   User.remove({'_id': req.session.userId})
       .exec(function(error) {
         if (error) {
@@ -59,7 +50,7 @@ router.get('/logout', function(req, res, next) {
   }
 });
 
-router.get('/login', function(req, res, next) {
+router.get('/login', mid.loggedOut, function(req, res, next) {
   res.render('login', { title: 'Login' });
 });
 
@@ -82,7 +73,7 @@ router.post('/login', function(req, res, next) {
   }
 });
 
-router.get('/register', function(req, res, next) {
+router.get('/register', mid.loggedOut,  function(req, res, next) {
   res.render('register', { title: 'Sign Up!' });
 });
 
